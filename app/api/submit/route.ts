@@ -12,6 +12,9 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || "");
 console.log(process.env.GOOGLE_API_KEY)
 console.log(process.env.PINECONE_API_KEY)
 console.log(process.env.PINECONE_ENVIRONMENT)
+// if (!process.env.PINECONE_INDEX) {
+//   throw new Error("PINECONE_INDEX environment variable is not set.");
+// }
 console.log(process.env.PINECONE_INDEX)
 
 export async function POST(req: NextRequest) {
@@ -41,7 +44,7 @@ export async function POST(req: NextRequest) {
 
       // Generate candidate profile
       console.log("Generating candidate profile...");
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       const profilePrompt = `
         Based on the following information, create a professional candidate profile:
         Name: ${name}
@@ -78,6 +81,7 @@ export async function POST(req: NextRequest) {
 
       // Generate a unique id for the record
       const recordId = generateUniqueId();
+      console.log(index)
 
       console.log("Upserting data to Pinecone...");
       await index.upsert([
@@ -86,7 +90,7 @@ export async function POST(req: NextRequest) {
           values: embeddingValues,
           metadata: {
             type: 'candidate',
-            name: formData.get("name")?.toString() || "",
+            name: formData.get("name")?.toString() || "st",
             email:email,
             linkedin: formData.get("linkedin")?.toString() || "",
             skills: formData.get("skills")?.toString() || "",
